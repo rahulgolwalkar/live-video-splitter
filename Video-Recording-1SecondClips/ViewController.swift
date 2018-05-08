@@ -26,7 +26,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
     var outputURL2 : URL?
     var isVideoFramesWritten: Bool?
     var fileName: String?
-    var iCount: Int?
+    var iCount: Int = 0
     
     var currentTime: Int64?
     
@@ -71,24 +71,9 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         captureDevice = nil
         isVideoFramesWritten = false
         currentTime = 0
-        iCount = 0
         initializeSession()
         hasWritingStarted = false
         video_queue = DispatchQueue(label: "com.Interval.video_queue")
-        
-        
-//        do {
-//            let content = try FileManager.default.contentsOfDirectory(atPath: NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])
-//            for file in content {
-//                // Create writer
-//                let documentsPath = NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])
-//                let url1 = documentsPath.appendingPathComponent(file)
-//
-//                try FileManager.default.removeItem(at: url1!)
-//            }
-//        } catch {
-//            print(error)
-//        }
     }
     
     
@@ -105,8 +90,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             avActiveAudioInput = avAudioInput2
             avActiveVideoInput = avVideoInput2
             
-            DispatchQueue(label: "com.Interval.video_queue2").asyncAfter(deadline: .now(), execute: {
-                // do some task
+            DispatchQueue(label: "com.Interval.video_queue2").asyncAfter(deadline: .now() + 0.1, execute: {
                 self.avAudioInput1?.markAsFinished()
                 self.avVideoInput1?.markAsFinished()
                 print(self.lastTime)
@@ -119,7 +103,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                         if self.avWriter1?.status == AVAssetWriterStatus.failed {
                             // Handle error here
                             print( "Error : ", self.avWriter1?.error.debugDescription as Any)
-                            return;
+                            return
                         }
                         
                     })
@@ -136,7 +120,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             avActiveAudioInput = avAudioInput1
             avActiveVideoInput = avVideoInput1
             
-            DispatchQueue(label: "com.Interval.video_queue3").asyncAfter(deadline: .now() , execute: {
+            DispatchQueue(label: "com.Interval.video_queue3").asyncAfter(deadline: .now() + 0.1, execute: {
                 // do some task
                 self.avAudioInput2?.markAsFinished()
                 self.avVideoInput2?.markAsFinished()
@@ -190,10 +174,8 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         
         switch authorizationStatus {
         case .notDetermined:
-            AVCaptureDevice.requestAccess(for: AVMediaType.video,
-                                          completionHandler: { (granted:Bool) -> Void in
+            AVCaptureDevice.requestAccess(for: AVMediaType.video, completionHandler: { (granted:Bool) -> Void in
                                             if granted {
-                                                
                                                 self.cameraAccess = true
                                             } else {
                                                 print(" Access denied, cannot use the app ")
@@ -218,8 +200,8 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
     
     func InitFirstWriter()
     {
-        iCount = iCount! + 1;
-        fileName = String(iCount!) + ".mp4"
+        iCount = iCount + 1;
+        fileName = String(iCount) + ".mp4"
         
         // Create writer
         let documentsPath = NSURL(fileURLWithPath: currentDirectory())
@@ -247,12 +229,11 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         
         avWriter1?.add(avAudioInput1!)
         avWriter1?.add(avVideoInput1!)
-        
-        
     }
+    
     func InitSecondWriter() {
-        iCount = iCount! + 1;
-        fileName = String(iCount!) + ".mp4"
+        iCount = iCount + 1;
+        fileName = String(iCount) + ".mp4"
         
         // Create writer
         let documentsPath = NSURL(fileURLWithPath: currentDirectory())
@@ -263,13 +244,10 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         avAudioInput2 = AVAssetWriterInput(mediaType: AVMediaType.audio, outputSettings: audioOutputSettings)
         avAudioInput2?.expectsMediaDataInRealTime = true
         
-
-        
         avVideoInput2 = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings:videoOutputSettings)
         avVideoInput2?.expectsMediaDataInRealTime = true
         avVideoInput2?.transform = CGAffineTransform(rotationAngle: CGFloat( Double.pi / 2))
 
-        
         avWriter2?.add(avAudioInput2!)
         avWriter2?.add(avVideoInput2!)
     }
@@ -281,7 +259,6 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         folderName = "\(Int(NSDate().timeIntervalSince1970))"
         FileManager.default.createDirectory(dirName: folderName)
 
-        
         // get device properties
         let compressionProperties = [   // other ways to compress the same @ https://stackoverflow.com/questions/11296642/
             AVVideoAverageBitRateKey: NSNumber(value: (Settings.shared.getBitrate() * 1024)),
@@ -371,10 +348,15 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         
         var time:Double = 0.0
         
-        for i in 1 ..< iCount! {
+        for i in 1 ..< iCount {
             fileName = String(i) + ".mp4"
-            let documentsPath = NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])
+            let documentsPath = NSURL(fileURLWithPath: currentDirectory())
             let outputURL = documentsPath.appendingPathComponent(fileName!)
+            
+            if (!FileManager.default.fileExists(atPath: (outputURL?.path)!)) {
+                continue
+            }
+            
             print("URL: " , fileName!)
             
             let asset = AVAsset(url: outputURL!)
@@ -414,9 +396,9 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         }
         
         
-        let documentsPath = NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])
+        let currentDirUrl = NSURL(fileURLWithPath: currentDirectory())
         
-        let path = documentsPath.appendingPathComponent("finalVideo.mp4")
+        let path = currentDirUrl.appendingPathComponent("finalVideo.mp4")
         
         let exporter = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetHighestQuality)
         exporter?.outputURL = path
@@ -452,8 +434,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                 return
             }
             
-            // UISaveVideoAtPathToSavedPhotosAlbum ((self.outputURL?.path)!, self, nil, nil);
-            //  self.merge();
+            self.merge();
             
         })
         
@@ -464,6 +445,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 //    }
     
     func captureOutput(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+    
         
         //        if (avWriter1?.status != nil) {
         //            print("Status of writer1 ", avWriter1?.status.rawValue as Any)
@@ -479,7 +461,6 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         //        }
         
         
-        
         if CMSampleBufferDataIsReady(sampleBuffer) == false {
             // Handle error
             print("Data is not ready")
@@ -487,15 +468,15 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         }
         
         
-        
         if let _ = captureOutput as? AVCaptureVideoDataOutput {
             
             startTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
             
+            
             if avActiveWriter?.status == AVAssetWriterStatus.unknown {
                 if (bufferArray.count > 0) {
                     startTime = CMSampleBufferGetPresentationTimeStamp(bufferArray[0])
-//                    print("1::  PTS", startTime)
+//                    print("1::  PTS",   startTime)
                 }
                 print(" Start writing and start session ")
                 avActiveWriter?.startWriting()
@@ -528,9 +509,8 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         
         
         if let _ = captureOutput as? AVCaptureVideoDataOutput {
-            
-            
-            if (avActiveVideoInput?.isReadyForMoreMediaData == true){
+
+            if (avActiveVideoInput?.isReadyForMoreMediaData == true) {
                 
                 // Check if we had pending buffer
                 if (bufferArray.count > 0)
@@ -588,9 +568,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                 }
                 avActiveAudioInput?.append(sampleBuffer)
             }
-            
         }
-        
     }
     
     private func currentDirectory() -> String {

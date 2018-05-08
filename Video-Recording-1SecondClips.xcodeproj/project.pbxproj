@@ -68,16 +68,16 @@
 		06EBA96D1E51598C00A774E0 /* Video-Recording-1SecondClips */ = {
 			isa = PBXGroup;
 			children = (
-				BB50C2D120A1E1A400F0FBD9 /* FilesTableViewController.swift */,
 				06EBA96E1E51598C00A774E0 /* AppDelegate.swift */,
+				06EBA9701E51598C00A774E0 /* ViewController.swift */,
+				BB50C2D120A1E1A400F0FBD9 /* FilesTableViewController.swift */,
 				BB50C2D320A1E3E000F0FBD9 /* SettingsViewController.swift */,
 				BB50C2CC20A1E17100F0FBD9 /* FolderTableViewCell.swift */,
 				BB50C2CB20A1E17100F0FBD9 /* MediaViewController.swift */,
-				BB50C2CD20A1E17100F0FBD9 /* Util.swift */,
-				06EBA9701E51598C00A774E0 /* ViewController.swift */,
 				06EBA9721E51598C00A774E0 /* Main.storyboard */,
 				06EBA9751E51598C00A774E0 /* Assets.xcassets */,
 				06EBA9771E51598C00A774E0 /* LaunchScreen.storyboard */,
+				BB899D8920A2144100F079A5 /* Utils */,
 				06EBA97A1E51598C00A774E0 /* Info.plist */,
 			);
 			path = "Video-Recording-1SecondClips";
@@ -89,6 +89,14 @@
 				06EBA9811E515A1A00A774E0 /* AVFoundation.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BB899D8920A2144100F079A5 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				BB50C2CD20A1E17100F0FBD9 /* Util.swift */,
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
