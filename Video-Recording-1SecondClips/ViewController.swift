@@ -96,7 +96,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
     @objc func runTimedCode() {
         // Check if segmentDuration second has elapsed or not
         
-        // Time to switch
+        // Time to switch 
         // print("Time to switch")
         if (avActiveWriter == avWriter1) {
             // print("Current recorder 1 ")
