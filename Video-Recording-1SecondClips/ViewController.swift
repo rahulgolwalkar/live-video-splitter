@@ -90,7 +90,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             avActiveAudioInput = avAudioInput2
             avActiveVideoInput = avVideoInput2
             
-            DispatchQueue(label: "com.Interval.video_queue2").asyncAfter(deadline: .now() + 0.1, execute: {
+            DispatchQueue(label: "com.Interval.video_queue2").asyncAfter(deadline: .now(), execute: {
                 self.avAudioInput1?.markAsFinished()
                 self.avVideoInput1?.markAsFinished()
                 print(self.lastTime)
@@ -120,7 +120,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             avActiveAudioInput = avAudioInput1
             avActiveVideoInput = avVideoInput1
             
-            DispatchQueue(label: "com.Interval.video_queue3").asyncAfter(deadline: .now() + 0.1, execute: {
+            DispatchQueue(label: "com.Interval.video_queue3").asyncAfter(deadline: .now(), execute: {
                 // do some task
                 self.avAudioInput2?.markAsFinished()
                 self.avVideoInput2?.markAsFinished()
@@ -526,20 +526,26 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                             // print("1: Writng video frames at ", lastTime)
                             
                             isVideoFramesWritten = true
-                        }
-                        else if (isVideoFramesWritten == true)
-                        {
+                        } else if (type == kCMMediaType_Audio) {
                             // print("Status not wrting ", avActiveWriter?.status as Any)
                             
                             // print("1: Writing audio frames ")
                             
                             avActiveAudioInput?.append(buffer);
+                        } else {
+                            print("OOOOO: Unknowsn buffer type")
                         }
                         
                     }
                     bufferArray.removeAll()
                 }
                 avActiveVideoInput?.append(sampleBuffer)
+
+//                if (avActiveWriter?.status == AVAssetWriterStatus.writing) {
+//                    avActiveVideoInput?.append(sampleBuffer)
+//                } else {
+//                    print("MISSED A VIDEO BUFFER !")
+//                }
                 lastTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
                 
                 // print("2: Writng video frames at ", lastTime)
@@ -566,7 +572,18 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                     }
                     bufferArray.removeAll()
                 }
+                
                 avActiveAudioInput?.append(sampleBuffer)
+                
+//                if (avActiveWriter?.status == AVAssetWriterStatus.writing) {
+//                    avActiveAudioInput?.append(sampleBuffer)
+//                } else {
+//                    print("MISSED AN AUDIO BUFFER !")
+//                }
+                
+                // try adding 3 asset writers
+
+                
             }
         }
     }
