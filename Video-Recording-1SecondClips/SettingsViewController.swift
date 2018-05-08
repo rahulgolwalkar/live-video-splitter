@@ -40,7 +40,7 @@ class SettingsViewController: UIViewController {
         fpsLabel.text = "\(fpsVal)"
         fpsSlider.value = Float(fpsVal)
         // AVCaptureDevice.default(for: AVMediaType.video)?.activeFormat.videoSupportedFrameRateRanges[0].minFrameRate
-        // the above can give the minimum and max framerate that is device and camera specific
+        // the above can give the minimum and max framerate that is device and camera specific 
         
         let bitrateVal = Settings.shared.getBitrate()
         bitrateLabel.text = "\(bitrateVal)"
