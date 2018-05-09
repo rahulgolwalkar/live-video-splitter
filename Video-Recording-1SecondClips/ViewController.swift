@@ -103,13 +103,20 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                         if self.avWriter1?.status == AVAssetWriterStatus.failed {
                             // Handle error here
                             print( "Error : ", self.avWriter1?.error.debugDescription as Any)
-                            return
+                            // return
                         }
+                        
+                        self.InitFirstWriter()
+                        
+                        DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + 0.1, execute: {
+//                            self.InitFirstWriter()
+                        })
+                        
                         
                     })
                     // print("finishWriting ended at ", self.getCurrentMillis())
                     
-                    self.InitFirstWriter()
+                    
                     // print("time after 2 ", self.getCurrentMillis())
                 }
             })
@@ -134,13 +141,23 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                     self.avWriter2?.finishWriting(completionHandler: {
                         if self.avWriter2?.status == AVAssetWriterStatus.failed {
                             // Handle error here
-                            print( "Error : ", self.avWriter2?.error.debugDescription as Any)
-                            return;
+                            print( "Error in writer completion: ", self.avWriter2?.error.debugDescription as Any)
+                            // return;
                         }
+                        
+                        self.InitSecondWriter()
+                        
+                        DispatchQueue.global(qos: .default).asyncAfter(deadline: .now() + 0.1, execute: {
+//                            self.InitSecondWriter()
+                        })
+
+                        
+                        
+                        
                     })
                     // print("finishWriting ended at ", self.getCurrentMillis())
                     
-                    self.InitSecondWriter()
+                    
                     
                     // print("time after 2 ", self.getCurrentMillis()
                 }
@@ -444,8 +461,20 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 //        return Int64(Date().timeIntervalSince1970 * 1000)
 //    }
     
+    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        
+        var mode: CMAttachmentMode = 0
+        let reason = CMGetAttachment(sampleBuffer, kCMSampleBufferAttachmentKey_DroppedFrameReason, &mode)
+        // print("reason \(String(describing: reason))") // Optional(OutOfBuffers)
+
+        
+        print("DROPPPPPPP reason - \(String(describing: reason)) ")
+    }
+    
     func captureOutput(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
     
+        
+        
         
         //        if (avWriter1?.status != nil) {
         //            print("Status of writer1 ", avWriter1?.status.rawValue as Any)
@@ -463,7 +492,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         
         if CMSampleBufferDataIsReady(sampleBuffer) == false {
             // Handle error
-            print("Data is not ready")
+            print("Error : Data is not ready")
             return;
         }
         
@@ -491,8 +520,9 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         }
         
         if avActiveWriter?.status != AVAssetWriterStatus.writing {
-            // print("Status not wrting ", avActiveWriter?.status as Any)
+//            print("Status not wrting ", avActiveWriter?.status as Any)
             if (hasWritingStarted == false) {
+                print("Error : some error here 34rewds")
                 return
             }
             
@@ -508,7 +538,11 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         }
         
         
+        var temprrrrrr = 0
+        
         if let _ = captureOutput as? AVCaptureVideoDataOutput {
+            
+            temprrrrrr += 1
 
             if (avActiveVideoInput?.isReadyForMoreMediaData == true) {
                 
@@ -557,9 +591,11 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             }
         }
         if let _ = captureOutput as? AVCaptureAudioDataOutput {
+            temprrrrrr += 1
             if avActiveAudioInput?.isReadyForMoreMediaData == true && isVideoFramesWritten == true{
                 // Check if we had pending buffer
                 if (bufferArray.count > 0) {
+                    temprrrrrr += 1
                     for  buffer in bufferArray {
                         let format = CMSampleBufferGetFormatDescription(buffer);
                         let type = CMFormatDescriptionGetMediaType(format!);
@@ -585,6 +621,9 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 
                 
             }
+        }
+        if temprrrrrr == 2 {
+        print("Temprrrrr = \(temprrrrrr)")
         }
     }
     
