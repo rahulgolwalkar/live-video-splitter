@@ -3,7 +3,7 @@
 import UIKit
 import AVFoundation
 
-class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate{
+class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDataOutputSampleBufferDelegate {
     
     @IBOutlet weak var RecordingButton: UIButton!
     var startCalled = false
@@ -94,7 +94,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             video_queue.async {
                 
 //            DispatchQueue(label: "com.Interval.video_queue2").asyncAfter(deadline: .now(), execute: {
-                self.avAudioInput1?.markAsFinished()
+                /// hhhhhhhhh self.avAudioInput1?.markAsFinished()
                 self.avVideoInput1?.markAsFinished()
                 print(self.lastTime)
                 self.avWriter1?.endSession(atSourceTime: self.lastTime)
@@ -130,7 +130,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 
 //                DispatchQueue(label: "com.Interval.video_queue3").asyncAfter(deadline: .now(), execute: {
                 // do some task
-                self.avAudioInput2?.markAsFinished()
+                // hhhhhh self.avAudioInput2?.markAsFinished()
                 self.avVideoInput2?.markAsFinished()
                 self.avWriter2?.endSession(atSourceTime: self.startTime)
                 // Finish writing for second one
@@ -444,7 +444,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         }
         captureLayer!.removeFromSuperlayer()
         
-        avActiveAudioInput?.markAsFinished()
+        // hhhhhhhhh avActiveAudioInput?.markAsFinished()
         avActiveVideoInput?.markAsFinished()
         avActiveWriter?.finishWriting(completionHandler: {
             if self.avActiveWriter?.status == AVAssetWriterStatus.failed {
@@ -486,23 +486,64 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
 
     
     func captureOutput(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        if CMSampleBufferDataIsReady(sampleBuffer) == false {
+            print("Error : Sample biffer not ready ")
+            return
+        }
+        
+        if (startCalled) {
+            startTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            if (avActiveWriter?.status != AVAssetWriterStatus.writing) {
+                avActiveWriter?.startWriting()
+                avActiveWriter?.startSession(atSourceTime: startTime)
+            }
+            
+            if let _ = captureOutput as? AVCaptureVideoDataOutput {
+                newVideoSample(sampleBuffer: sampleBuffer)
+            } else {
+                newAudioSample(sampleBuffer: sampleBuffer)
+            }
+        }
+    }
+
+    func newVideoSample(sampleBuffer: CMSampleBuffer) {
+        if (startCalled) {
+            if avActiveWriter?.status != AVAssetWriterStatus.writing {
+                print("Warning : writer status is \(String(describing: avActiveWriter?.status))")
+                if avActiveWriter?.status == AVAssetWriterStatus.failed {
+                    print("ERROR d fsf dsf dsfdsf : \(String(describing: avActiveWriter?.error))")
+                }
+                return
+            }
+            
+            if (avActiveVideoInput?.isReadyForMoreMediaData)! {
+                lastTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+                if (!(avActiveVideoInput?.append(sampleBuffer))!) {
+                    print("ERROR writing sample buffer")
+                }
+            }
+        }
+    }
     
-        
-        
-        
-        //        if (avWriter1?.status != nil) {
-        //            print("Status of writer1 ", avWriter1?.status.rawValue as Any)
-        //        }
-        //        else {
-        //            print("Status of writer1 nil")
-        //        }
-        //
-        //        if (avWriter2?.status != nil) {
-        //            print("Status of writer2 ", avWriter2?.status.rawValue as Any)
-        //        } else {
-        //            print("Status of writer2 nil")
-        //        }
-        
+    func newAudioSample(sampleBuffer: CMSampleBuffer) {
+        if (startCalled) {
+            if (avActiveWriter?.status != AVAssetWriterStatus.writing) {
+                print("Warning : writier not writing")
+                if (avActiveWriter?.status == AVAssetWriterStatus.failed) {
+                    print("error : sdafadwr : \(String(describing: avActiveWriter?.error))")
+                }
+                return
+            }
+            if (avActiveAudioInput?.isReadyForMoreMediaData)! {
+                if (!(avActiveAudioInput?.append(sampleBuffer))!) {
+                    print("error : cannot write sample bufffer ")
+                }
+            }
+        }
+    }
+    
+    func captureOutputOld(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+    
         
         if CMSampleBufferDataIsReady(sampleBuffer) == false {
             // Handle error
@@ -510,33 +551,59 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             return;
         }
         
+        // pppppppppp
+        if let _ = captureOutput as? AVCaptureAudioDataOutput {
+            if avActiveAudioInput?.isReadyForMoreMediaData == true && isVideoFramesWritten == true {
+                // Check if we had pending buffer
+                if (bufferArray.count > 0) {
+                    for  buffer in bufferArray {
+                        let format = CMSampleBufferGetFormatDescription(buffer);
+                        let type = CMFormatDescriptionGetMediaType(format!);
+                        if (type == kCMMediaType_Video) {
+                            avActiveVideoInput?.append(buffer);
+                            print("3: Writng video frames at ", lastTime)
+                        } else {
+                            avActiveAudioInput?.append(buffer);
+                        }
+                    }
+                    bufferArray.removeAll()
+                }
+                
+                avActiveAudioInput?.append(sampleBuffer)
+                
+                //                if (avActiveWriter?.status == AVAssetWriterStatus.writing) {
+                //                    avActiveAudioInput?.append(sampleBuffer)
+                //                } else {
+                //                    print("MISSED AN AUDIO BUFFER !")
+                //                }
+                
+                // try adding 3 asset writers
+                
+                
+            }
+        }
+
         
         if let _ = captureOutput as? AVCaptureVideoDataOutput {
             
             startTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-            
-            
             if avActiveWriter?.status == AVAssetWriterStatus.unknown {
                 if (bufferArray.count > 0) {
                     startTime = CMSampleBufferGetPresentationTimeStamp(bufferArray[0])
-//                    print("1::  PTS",   startTime)
+                    
+                    print("data in buffer array BBUUFFFEERERRR AAATATY ")
                 }
                 print(" Start writing and start session ")
                 avActiveWriter?.startWriting()
                 avActiveWriter?.startSession(atSourceTime: startTime)
-//                print("2::  PTS", startTime)
-//
-//                print("1:: Startsession called at PTS", startTime)
                 hasWritingStarted = true
                 isVideoFramesWritten = false
-                
             }
         }
         
         if avActiveWriter?.status != AVAssetWriterStatus.writing {
 //            print("Status not wrting ", avActiveWriter?.status as Any)
             if (hasWritingStarted == false) {
-                print("Error : some error here 34rewds")
                 return
             }
             
@@ -572,25 +639,18 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                             
                             isVideoFramesWritten = true
                         } else if (type == kCMMediaType_Audio) {
-                            // print("Status not wrting ", avActiveWriter?.status as Any)
-                            
-                            // print("1: Writing audio frames ")
-                            
                             avActiveAudioInput?.append(buffer);
-                        } else {
-                            print("OOOOO: Unknowsn buffer type")
                         }
-                        
                     }
                     bufferArray.removeAll()
                 }
-                avActiveVideoInput?.append(sampleBuffer)
+//                avActiveVideoInput?.append(sampleBuffer)
 
-//                if (avActiveWriter?.status == AVAssetWriterStatus.writing) {
-//                    avActiveVideoInput?.append(sampleBuffer)
-//                } else {
-//                    print("MISSED A VIDEO BUFFER !")
-//                }
+                if (avActiveWriter?.status == AVAssetWriterStatus.writing) {
+                    avActiveVideoInput?.append(sampleBuffer)
+                } else {
+                    print("MISSED A VIDEO BUFFER !")
+                }
                 lastTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
                 
                 // print("2: Writng video frames at ", lastTime)
@@ -601,43 +661,17 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                 
             }
         }
-        if let _ = captureOutput as? AVCaptureAudioDataOutput {
-            if avActiveAudioInput?.isReadyForMoreMediaData == true && isVideoFramesWritten == true{
-                // Check if we had pending buffer
-                if (bufferArray.count > 0) {
-                    for  buffer in bufferArray {
-                        let format = CMSampleBufferGetFormatDescription(buffer);
-                        let type = CMFormatDescriptionGetMediaType(format!);
-                        if (type == kCMMediaType_Video) {
-                            avActiveVideoInput?.append(buffer);
-                            print("3: Writng video frames at ", lastTime)
-                        } else {
-                            avActiveAudioInput?.append(buffer);
-                        }
-                    }
-                    bufferArray.removeAll()
-                }
-                
-                avActiveAudioInput?.append(sampleBuffer)
-                
-//                if (avActiveWriter?.status == AVAssetWriterStatus.writing) {
-//                    avActiveAudioInput?.append(sampleBuffer)
-//                } else {
-//                    print("MISSED AN AUDIO BUFFER !")
-//                }
-                
-                // try adding 3 asset writers
-
-                
-            }
-        }
+        
+        
+        ///// ppppppppppp
+        
     }
     
     private func currentDirectory() -> String {
         return "\(FileManager.documentsDir())/\(folderName)/"
     }
-    
 }
+
 
 extension AVCaptureDevice {
     
