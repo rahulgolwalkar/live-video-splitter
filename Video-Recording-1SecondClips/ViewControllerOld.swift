@@ -3,7 +3,7 @@
 import UIKit
 import AVFoundation
 
-class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate{
+class ViewControllerOld: UIViewController, AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate{
     
     @IBOutlet weak var RecordingButton: UIButton!
     var startCalled = false
@@ -40,15 +40,15 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
     var hasWritingStarted: Bool!
     
     
-//    // Custom Settings ------- You can edit them
-//    let videoHeight = 1080
-//    let videoWidth  = 1920
-//
-//    let bitratex1024:Float = 4096
-//    let segmentDuration: Double = 5
-//
-//    let capturePreset: AVCaptureSession.Preset = AVCaptureSession.Preset.high
-
+    //    // Custom Settings ------- You can edit them
+    //    let videoHeight = 1080
+    //    let videoWidth  = 1920
+    //
+    //    let bitratex1024:Float = 4096
+    //    let segmentDuration: Double = 5
+    //
+    //    let capturePreset: AVCaptureSession.Preset = AVCaptureSession.Preset.high
+    
     
     
     
@@ -82,7 +82,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
     @objc func runTimedCode() {
         // Check if segmentDuration second has elapsed or not
         
-        // Time to switch 
+        // Time to switch
         // print("Time to switch")
         if (avActiveWriter == avWriter1) {
             // print("Current recorder 1 ")
@@ -93,7 +93,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             
             video_queue.async {
                 
-//            DispatchQueue(label: "com.Interval.video_queue2").asyncAfter(deadline: .now(), execute: {
+                //            DispatchQueue(label: "com.Interval.video_queue2").asyncAfter(deadline: .now(), execute: {
                 self.avAudioInput1?.markAsFinished()
                 self.avVideoInput1?.markAsFinished()
                 print(self.lastTime)
@@ -127,8 +127,8 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             avActiveVideoInput = avVideoInput1
             
             video_queue.async {
-
-//                DispatchQueue(label: "com.Interval.video_queue3").asyncAfter(deadline: .now(), execute: {
+                
+                //                DispatchQueue(label: "com.Interval.video_queue3").asyncAfter(deadline: .now(), execute: {
                 // do some task
                 self.avAudioInput2?.markAsFinished()
                 self.avVideoInput2?.markAsFinished()
@@ -148,7 +148,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                         
                         self.InitSecondWriter()
                         
-
+                        
                         
                         
                         
@@ -190,11 +190,11 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         switch authorizationStatus {
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: AVMediaType.video, completionHandler: { (granted:Bool) -> Void in
-                                            if granted {
-                                                self.cameraAccess = true
-                                            } else {
-                                                print(" Access denied, cannot use the app ")
-                                            }
+                if granted {
+                    self.cameraAccess = true
+                } else {
+                    print(" Access denied, cannot use the app ")
+                }
             })
             break
         case .authorized:
@@ -209,7 +209,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         });
     }
     
-
+    
     
     
     
@@ -236,12 +236,12 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         
         avAudioInput1 = AVAssetWriterInput(mediaType: AVMediaType.audio, outputSettings: audioOutputSettings)
         avAudioInput1?.expectsMediaDataInRealTime = true
-
+        
         avVideoInput1 = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings:videoOutputSettings)
         avVideoInput1?.expectsMediaDataInRealTime = true
-
+        
         avVideoInput1?.transform = CGAffineTransform(rotationAngle: CGFloat( Double.pi / 2))
-
+        
         avWriter1?.add(avAudioInput1!)
         avWriter1?.add(avVideoInput1!)
     }
@@ -258,11 +258,11 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         
         avAudioInput2 = AVAssetWriterInput(mediaType: AVMediaType.audio, outputSettings: audioOutputSettings)
         avAudioInput2?.expectsMediaDataInRealTime = true
-
+        
         avVideoInput2 = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings:videoOutputSettings)
         avVideoInput2?.expectsMediaDataInRealTime = true
         avVideoInput2?.transform = CGAffineTransform(rotationAngle: CGFloat( Double.pi / 2))
-
+        
         avWriter2?.add(avAudioInput2!)
         avWriter2?.add(avVideoInput2!)
     }
@@ -273,7 +273,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         RecordingButton.setTitle("Stop Recording", for: .normal )
         folderName = "\(Int(NSDate().timeIntervalSince1970))"
         FileManager.default.createDirectory(dirName: folderName)
-
+        
         // get device properties
         let compressionProperties = [   // other ways to compress the same @ https://stackoverflow.com/questions/11296642/
             AVVideoAverageBitRateKey: NSNumber(value: (Settings.shared.getBitrate() * 1024)),
@@ -286,13 +286,13 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             AVVideoScalingModeKey : AVVideoScalingModeResizeAspectFill,
             AVVideoCompressionPropertiesKey : compressionProperties
         ]
-
+        
         
         // Get the device
         if (captureDevice == nil) {
             captureDevice = AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInWideAngleCamera, for: AVMediaType.video, position: AVCaptureDevice.Position.back)
         }
-        captureDevice?.configureDesiredFrameRate(Settings.shared.getFPS())
+        // captureDevice?.configureDesiredFrameRate(Settings.shared.getFPS())
         
         InitFirstWriter()
         InitSecondWriter()
@@ -314,10 +314,9 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             session.addInput(ainput)
             
             let videoOutput = AVCaptureVideoDataOutput()
-            
             let videoserialQueue = DispatchQueue(label: "videoQueue")
             videoOutput.setSampleBufferDelegate(self, queue: video_queue) // rrrrr videoserialQueue)
-            videoOutput.alwaysDiscardsLateVideoFrames = false
+            videoOutput.alwaysDiscardsLateVideoFrames = true
             let connectionVideo = videoOutput.connection(with: AVMediaType.video)
             connectionVideo?.videoOrientation = AVCaptureVideoOrientation.portrait;
             if (session?.canAddOutput(videoOutput) != nil) {
@@ -342,12 +341,9 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         let serialQueue = DispatchQueue(label: "audioQueue")
         audioDataOutput.setSampleBufferDelegate(self, queue: video_queue) //serialQueue)
         
-        
         if (session?.canAddOutput(audioDataOutput) != nil) {
             session?.addOutput(audioDataOutput)
             print(" Audio output added ")
-        } else {
-            print("Error : Did not add audio output")
         }
         session.startRunning()
         
@@ -459,34 +455,34 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         
     }
     
-//    func getCurrentMillis()->Int64 {
-//        return Int64(Date().timeIntervalSince1970 * 1000)
-//    }
+    //    func getCurrentMillis()->Int64 {
+    //        return Int64(Date().timeIntervalSince1970 * 1000)
+    //    }
     
     func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         
         var mode: CMAttachmentMode = 0
         let reason = CMGetAttachment(sampleBuffer, kCMSampleBufferAttachmentKey_DroppedFrameReason, &mode)
         // print("reason \(String(describing: reason))") // Optional(OutOfBuffers)
-
+        
         
         print("DROPPPPPPP reason - \(String(describing: reason)) ")
     }
     
     
-//    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-//        if let input = avActiveAudioInput {
-//            video_queue.async { [weak self] in
-//                if input.isReadyForMoreMediaData && (self?.startCalled)! {
-//                    input.append(sampleBuffer)
-//                }
-//            }
-//        }
-//    }
-
+    //    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+    //        if let input = avActiveAudioInput {
+    //            video_queue.async { [weak self] in
+    //                if input.isReadyForMoreMediaData && (self?.startCalled)! {
+    //                    input.append(sampleBuffer)
+    //                }
+    //            }
+    //        }
+    //    }
+    
     
     func captureOutput(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-    
+        
         
         
         
@@ -519,14 +515,14 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
             if avActiveWriter?.status == AVAssetWriterStatus.unknown {
                 if (bufferArray.count > 0) {
                     startTime = CMSampleBufferGetPresentationTimeStamp(bufferArray[0])
-//                    print("1::  PTS",   startTime)
+                    //                    print("1::  PTS",   startTime)
                 }
                 print(" Start writing and start session ")
                 avActiveWriter?.startWriting()
                 avActiveWriter?.startSession(atSourceTime: startTime)
-//                print("2::  PTS", startTime)
-//
-//                print("1:: Startsession called at PTS", startTime)
+                //                print("2::  PTS", startTime)
+                //
+                //                print("1:: Startsession called at PTS", startTime)
                 hasWritingStarted = true
                 isVideoFramesWritten = false
                 
@@ -534,7 +530,7 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
         }
         
         if avActiveWriter?.status != AVAssetWriterStatus.writing {
-//            print("Status not wrting ", avActiveWriter?.status as Any)
+            //            print("Status not wrting ", avActiveWriter?.status as Any)
             if (hasWritingStarted == false) {
                 print("Error : some error here 34rewds")
                 return
@@ -585,12 +581,12 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                     bufferArray.removeAll()
                 }
                 avActiveVideoInput?.append(sampleBuffer)
-
-//                if (avActiveWriter?.status == AVAssetWriterStatus.writing) {
-//                    avActiveVideoInput?.append(sampleBuffer)
-//                } else {
-//                    print("MISSED A VIDEO BUFFER !")
-//                }
+                
+                //                if (avActiveWriter?.status == AVAssetWriterStatus.writing) {
+                //                    avActiveVideoInput?.append(sampleBuffer)
+                //                } else {
+                //                    print("MISSED A VIDEO BUFFER !")
+                //                }
                 lastTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
                 
                 // print("2: Writng video frames at ", lastTime)
@@ -620,14 +616,14 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
                 
                 avActiveAudioInput?.append(sampleBuffer)
                 
-//                if (avActiveWriter?.status == AVAssetWriterStatus.writing) {
-//                    avActiveAudioInput?.append(sampleBuffer)
-//                } else {
-//                    print("MISSED AN AUDIO BUFFER !")
-//                }
+                //                if (avActiveWriter?.status == AVAssetWriterStatus.writing) {
+                //                    avActiveAudioInput?.append(sampleBuffer)
+                //                } else {
+                //                    print("MISSED AN AUDIO BUFFER !")
+                //                }
                 
                 // try adding 3 asset writers
-
+                
                 
             }
         }
@@ -639,37 +635,38 @@ class ViewController: UIViewController, AVCaptureAudioDataOutputSampleBufferDele
     
 }
 
-extension AVCaptureDevice {
-    
-    /// http://stackoverflow.com/questions/21612191/set-a-custom-avframeraterange-for-an-avcapturesession#27566730
-    func configureDesiredFrameRate(_ desiredFrameRate: Int) {
-        
-        var isFPSSupported = false
-        
-        do {
-            
-            if let videoSupportedFrameRateRanges = activeFormat.videoSupportedFrameRateRanges as? [AVFrameRateRange] {
-                for range in videoSupportedFrameRateRanges {
-                    if (range.maxFrameRate >= Double(desiredFrameRate) && range.minFrameRate <= Double(desiredFrameRate)) {
-                        isFPSSupported = true
-                        break
-                    }
-                }
-            }
-            
-            if isFPSSupported {
-                try lockForConfiguration()
-                activeVideoMaxFrameDuration = CMTimeMake(1, Int32(desiredFrameRate))
-                activeVideoMinFrameDuration = CMTimeMake(1, Int32(desiredFrameRate))
-                unlockForConfiguration()
-            } else {
-                print("FPS NOT SUPPORTED -  \(desiredFrameRate)")
-            }
-        } catch {
-            print("lockForConfiguration error: \(error.localizedDescription)")
-        }
-    }
-    
-}
+//extension AVCaptureDevice {
+//
+//    /// http://stackoverflow.com/questions/21612191/set-a-custom-avframeraterange-for-an-avcapturesession#27566730
+//    func configureDesiredFrameRate(_ desiredFrameRate: Int) {
+//
+//        var isFPSSupported = false
+//
+//        do {
+//
+//            if let videoSupportedFrameRateRanges = activeFormat.videoSupportedFrameRateRanges as? [AVFrameRateRange] {
+//                for range in videoSupportedFrameRateRanges {
+//                    if (range.maxFrameRate >= Double(desiredFrameRate) && range.minFrameRate <= Double(desiredFrameRate)) {
+//                        isFPSSupported = true
+//                        break
+//                    }
+//                }
+//            }
+//
+//            if isFPSSupported {
+//                try lockForConfiguration()
+//                activeVideoMaxFrameDuration = CMTimeMake(1, Int32(desiredFrameRate))
+//                activeVideoMinFrameDuration = CMTimeMake(1, Int32(desiredFrameRate))
+//                unlockForConfiguration()
+//            } else {
+//                print("FPS NOT SUPPORTED -  \(desiredFrameRate)")
+//            }
+//        } catch {
+//            print("lockForConfiguration error: \(error.localizedDescription)")
+//        }
+//    }
+//
+//}
+
 
 

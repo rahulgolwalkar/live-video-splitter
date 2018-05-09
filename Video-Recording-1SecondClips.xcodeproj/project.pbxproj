@@ -18,6 +18,7 @@
 		BB50C2D020A1E17100F0FBD9 /* Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB50C2CD20A1E17100F0FBD9 /* Util.swift */; };
 		BB50C2D220A1E1A400F0FBD9 /* FilesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB50C2D120A1E1A400F0FBD9 /* FilesTableViewController.swift */; };
 		BB50C2D420A1E3E000F0FBD9 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB50C2D320A1E3E000F0FBD9 /* SettingsViewController.swift */; };
+		BBDC6F4820A335A1008D7A3E /* ViewControllerOld.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDC6F4720A335A1008D7A3E /* ViewControllerOld.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 		BB50C2CD20A1E17100F0FBD9 /* Util.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
 		BB50C2D120A1E1A400F0FBD9 /* FilesTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilesTableViewController.swift; sourceTree = "<group>"; };
 		BB50C2D320A1E3E000F0FBD9 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		BBDC6F4720A335A1008D7A3E /* ViewControllerOld.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerOld.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +81,7 @@
 				06EBA9771E51598C00A774E0 /* LaunchScreen.storyboard */,
 				BB899D8920A2144100F079A5 /* Utils */,
 				06EBA97A1E51598C00A774E0 /* Info.plist */,
+				BBDC6F4720A335A1008D7A3E /* ViewControllerOld.swift */,
 			);
 			path = "Video-Recording-1SecondClips";
 			sourceTree = "<group>";
@@ -173,6 +176,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BBDC6F4820A335A1008D7A3E /* ViewControllerOld.swift in Sources */,
 				06EBA9711E51598C00A774E0 /* ViewController.swift in Sources */,
 				BB50C2CE20A1E17100F0FBD9 /* MediaViewController.swift in Sources */,
 				BB50C2D420A1E3E000F0FBD9 /* SettingsViewController.swift in Sources */,
